@@ -47,9 +47,16 @@ def main() -> None:
 	args = parser.parse_args()
 
 	detector = YoloV8Detector(model_name=args.model, device=None, conf_threshold=args.conf)
-	capture = cv2.VideoCapture(args.camera)
-	capture.set(cv2.CAP_PROP_FRAME_WIDTH, args.width)
-	capture.set(cv2.CAP_PROP_FRAME_HEIGHT, args.height)
+
+	def open_camera(index: int) -> cv2.VideoCapture:
+		cap = cv2.VideoCapture(index)
+		cap.set(cv2.CAP_PROP_FRAME_WIDTH, args.width)
+		cap.set(cv2.CAP_PROP_FRAME_HEIGHT, args.height)
+		return cap
+
+	current_cam = int(args.camera)
+	capture = open_camera(current_cam)
+	print(f"Using camera index: {current_cam}")
 
 	obstacle_classes = {
 		"person": True,
@@ -70,7 +77,7 @@ def main() -> None:
 	}
 
 	show_viz = not args.no_viz
-	print("Press 'v' to toggle visualization, 'q' or ESC to quit.")
+	print("Press 'v' to toggle visualization, 'c' next cam, 'z' prev cam, 'q' or ESC to quit.")
 
 	while True:
 		ok, frame = capture.read()
@@ -96,6 +103,30 @@ def main() -> None:
 			break
 		if key in (ord('v'),):
 			show_viz = not show_viz
+		if key in (ord('c'),):
+			try_index = (current_cam + 1) % 10
+			new_cap = open_camera(try_index)
+			ok, _ = new_cap.read()
+			if ok:
+				capture.release()
+				capture = new_cap
+				current_cam = try_index
+				print(f"Switched to camera index: {current_cam}")
+			else:
+				new_cap.release()
+				print(f"Camera index {try_index} not available")
+		if key in (ord('z'),):
+			try_index = (current_cam - 1) % 10
+			new_cap = open_camera(try_index)
+			ok, _ = new_cap.read()
+			if ok:
+				capture.release()
+				capture = new_cap
+				current_cam = try_index
+				print(f"Switched to camera index: {current_cam}")
+			else:
+				new_cap.release()
+				print(f"Camera index {try_index} not available")
 
 	capture.release()
 	cv2.destroyAllWindows()

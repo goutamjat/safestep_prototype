@@ -26,6 +26,8 @@ python app.py
 ```
 Keys:
 - v: toggle visualization overlays
+- c: switch to next camera index
+- z: switch to previous camera index
 - q or ESC: quit
 
 How it works
@@ -48,7 +50,8 @@ File structure
 - requirements.txt: Python dependencies.
 
 Troubleshooting
-- If camera index 0 fails, try editing `camera_index` in `app.py`.
+- To change cameras at runtime, press 'c' or 'z'.
+- If no camera opens, try launching with a specific index: `python app.py --camera 1`.
 - If FPS is low, switch to `yolov8n.pt` (nano) or reduce frame size.
 - If you get CUDA errors, run on CPU by forcing `device='cpu'` in `detector.py`.
 
